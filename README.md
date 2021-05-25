@@ -2,32 +2,50 @@ Here are instructions for getting HomeAssistant installed or back up and running
 ## TOC
 - Pre-booting
 - Setup for CC2538 + CC2592
-- Boot
-- Prerequisites
-- Install instructions
+- HA prerequisites
+- Install HA
 - Add-ons
 - Configuration
 - Backups/storage
 
 ## Pre-booting
+Open the boot drive on a writing machine aka - your laptop
 1. `touch ssh` in the root directory
 2. If running wifi add the wpa_supplicant.conf file
 
 ## Setup for CC2538 + CC2592
-1. Modify `mnt/boot/config.txt`
-    - Enable `enable_uart=1` by removing `#`
-    - Under `[all]` add the line `dtoverlay=disable-bt` to disable it
+Open the boot drive on a writing machine aka - your laptop
+1. Modify `config.txt` by adding the following at the bottom
+```
+#disable bluetooth and enable GPIO for zigbee
+ enable_uart=1
+ dtoverlay=pi3-disable-bt
+ ```
+2. Boot the bitch and use raspi-config set uart to enabled
 
-## Boot the bitch
-1. Power up 
-2. SSH into the machine with pi:raspberry
+## HA prerequisites
+1. Install packages: AppArmor, Network Manager and jq
+```
+sudo apt-get install network-manager apparmor-utils jq git -y
+```
+2. Install Docker from bash script 
+```
+curl -fsSL https://get.docker.com -o get-docker.sh
+sudo sh get-docker.sh
+sudo usermod -aG docker pi
+```
+3. Disable ModemManager `systemctl disable ModemManager.service`. Home Assistant will provide a warning if enabled
 
-## Software prerequisites
-1. Install Docker from bash script
-2. Install packages: AppArmor, Network Manager and jq
+4. UUID=36E1-9145 /mnt/video_storage  exfat  defaults  0 0
+
+6. mount external drive to `/usr/share/media` and add mount to `/etc/fstab`
 
 ## Install Home Assistant
-Use the installation guide for Home Assistant Supervised to get up and running. Here is a summary and linked references.
-1. Install Supervised
+_This is not needed but worth the experiment_ - Home Assistant Supervised doesn't support adding volumes to the docker containers. I have pulled the [Supervised-installer repo](https://github.com/home-assistant/supervised-installer) down and modified the installer.sh to point to local files directory for the docker-compose setup. The docker-compose was modified in `files/hassio-supervisor` to include the zigbee device and the video_storage volume.
 
-[Supervised-installer repo](https://github.com/home-assistant/supervised-installer)
+## Add-ons
+## Configuration
+## Backups/storage
+
+## Resources
+- [Really good tutorial for Supervised Install](https://peyanski.com/how-to-install-home-assistant-supervised-official-way/)
